@@ -1,14 +1,8 @@
-# apps/accounts/urls.py
-
 from django.urls import path
 from . import views
 
-app_name = 'accounts'
-
 urlpatterns = [
-    # Will be populated with views for:
-    # - User registration (vendor/customer)
-    # - Login
-    # - Profile management
-    # - Password reset
+    path('signup/', views.SignupView.as_view(), name='signup'),
+    path('login/', views.LoginView.as_view(), name='login'),
+    path('profile/', views.ProfileView.as_view(), name='profile'),
 ]
