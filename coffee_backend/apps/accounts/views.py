@@ -3,8 +3,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
-from.models import User, VendorProfile
-from.serializers import UserSerializer, VendorProfileSerializer
+from .models import VendorProfile
+from .serializers import UserSerializer, VendorProfileSerializer
 
 class SignupView(APIView):
     def post(self, request):
