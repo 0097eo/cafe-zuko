@@ -11,7 +11,6 @@ class SignupView(APIView):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            
             if user.user_type == 'VENDOR':
                 VendorProfile.objects.create(
                     user=user,
