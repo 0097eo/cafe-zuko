@@ -1,12 +1,12 @@
 from django.urls import path
-from ..orders import views
-
-app_name = 'products'
+from . import views
 
 urlpatterns = [
-    # Will be populated with views for:
-    # - List/Create products
-    # - Retrieve/Update/Delete product
-    # - Product categories
-    # - Product search
+    # Product URLs
+    path('products/', views.ProductListCreateView.as_view(), name='product-list'),
+    path('products/<int:pk>/', views.ProductDetailView.as_view(), name='product-detail'),
+    
+    # Review URLs
+    path('products/<int:product_pk>/reviews/', views.ReviewListCreateView.as_view(), name='review-list'),
+    path('products/<int:product_pk>/reviews/<int:review_pk>/', views.ReviewDetailView.as_view(), name='review-detail'),
 ]
