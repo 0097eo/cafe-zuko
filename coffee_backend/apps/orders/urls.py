@@ -3,12 +3,8 @@
 from django.urls import path
 from . import views
 
-app_name = 'orders'
 
 urlpatterns = [
-    # Will be populated with views for:
-    # - Create order
-    # - List orders
-    # - Order details
-    # - Update order status
+    path('orders/', views.OrderListCreateView.as_view(), name='order-list'),
+    path('orders/<int:pk>/', views.OrderDetailView.as_view(), name='order-detail'),
 ]
