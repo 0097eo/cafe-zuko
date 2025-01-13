@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'apps.products.apps.ProductsConfig',
     'apps.orders.apps.OrdersConfig',
     'apps.payments.apps.PaymentsConfig',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
