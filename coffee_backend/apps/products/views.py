@@ -44,11 +44,20 @@ class ProductListCreateView(APIView):
         if roast:
             queryset = queryset.filter(roast_type=roast)
         
-        serializer = ProductSerializer(queryset, many=True)
+        serializer = ProductSerializer(queryset, many=True, context={'request': request})
         return Response(serializer.data)
 
     def post(self, request):
-        serializer = ProductSerializer(data=request.data)
+        # Create a mutable copy of the data
+        data = request.data.copy()
+
+        # Handle image upload
+        if 'image' in request.FILES:
+            # The cloudinary field will handle the upload automatically
+            # No need for manual upload as the CloudinaryField handles it
+            pass
+
+        serializer = ProductSerializer(data=data, context={'request': request})
         if serializer.is_valid():
             serializer.save(vendor=request.user.vendorprofile)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -62,13 +71,23 @@ class ProductDetailView(APIView):
 
     def get(self, request, pk):
         product = self.get_object(pk)
-        serializer = ProductSerializer(product)
+        serializer = ProductSerializer(product, context={'request': request})
         return Response(serializer.data)
 
     def put(self, request, pk):
         product = self.get_object(pk)
         self.check_object_permissions(request, product)
-        serializer = ProductSerializer(product, data=request.data)
+        
+        # Create a mutable copy of the data
+        data = request.data.copy()
+
+        # Handle image update
+        if 'image' in request.FILES:
+            # The CloudinaryField will handle the update automatically
+            # If there's an existing image, it will be replaced
+            pass
+            
+        serializer = ProductSerializer(product, data=data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -77,6 +96,8 @@ class ProductDetailView(APIView):
     def delete(self, request, pk):
         product = self.get_object(pk)
         self.check_object_permissions(request, product)
+        
+        # The image deletion is handled automatically by Cloudinary
         product.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 

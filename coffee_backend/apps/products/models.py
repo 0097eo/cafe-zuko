@@ -1,4 +1,5 @@
 from django.db import models
+from cloudinary.models import CloudinaryField
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
@@ -27,7 +28,7 @@ class Product(models.Model):
     stock = models.PositiveIntegerField(default=0)
     roast_type = models.CharField(max_length=10, choices=ROAST_CHOICES)
     origin = models.CharField(max_length=100)
-    image = models.ImageField(upload_to='product_images/')
+    image = CloudinaryField('image')
     is_available = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

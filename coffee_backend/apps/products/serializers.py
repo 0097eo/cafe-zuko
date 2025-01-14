@@ -13,13 +13,14 @@ class ProductSerializer(serializers.ModelSerializer):
     vendor = serializers.ReadOnlyField(source='vendor.user.username')
     reviews = ProductReviewSerializer(many=True, read_only=True)
     average_rating = serializers.SerializerMethodField()
+    image_url = serializers.SerializerMethodField()
     
     class Meta:
         model = Product
         fields = [
             'id', 'vendor', 'category', 'name', 'description',
             'price', 'stock', 'roast_type', 'origin', 'image',
-            'is_available', 'created_at', 'updated_at',
+            'image_url', 'is_available', 'created_at', 'updated_at',
             'reviews', 'average_rating'
         ]
         read_only_fields = ['vendor', 'created_at', 'updated_at']
@@ -28,4 +29,10 @@ class ProductSerializer(serializers.ModelSerializer):
         reviews = obj.reviews.all()
         if reviews:
             return sum(review.rating for review in reviews) / len(reviews)
+        return None
+    
+    
+    def get_image_url(self, obj):
+        if obj.image:
+            return obj.image.url
         return None
