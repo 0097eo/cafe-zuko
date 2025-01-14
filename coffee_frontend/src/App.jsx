@@ -1,10 +1,14 @@
+import NavBar from "./components/NavBar"
+import {BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import LandingPage from "./pages/LandingPage"
 function App() {
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <h1 className="text-4xl font-bold text-blue-600">
-        Welcome to Cafe Zuko
-      </h1>
-    </div>
+    <Router>
+      <NavBar />
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+      </Routes>
+    </Router>
   )
 }
 
