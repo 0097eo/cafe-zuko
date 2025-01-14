@@ -11,6 +11,10 @@ djangorestframework = "*"
 djangorestframework-simplejwt = "*"
 drf-nested-routers = "*"
 django-filter = "*"
+requests = "*"
+django-cors-headers = "*"
+cloudinary = "*"
+django-cloudinary-storage = "*"
 
 [dev-packages]
 
