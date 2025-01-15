@@ -1,21 +1,30 @@
 from rest_framework import serializers
 from .models import User, VendorProfile
 
+from rest_framework import serializers
+from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
+
+User = get_user_model()
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'password', 'user_type', 'phone_number', 'address')
+        fields = ('id', 'email', 'username', 'password', 'phone_number', 'user_type')
         extra_kwargs = {'password': {'write_only': True}}
 
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("This email address is already in use.")
+        return value
+
+    def validate_username(self, value):
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("This username is already taken.")
+        return value
+
     def create(self, validated_data):
-        user = User.objects.create_user(
-            username=validated_data['username'],
-            email=validated_data['email'],
-            password=validated_data['password'],
-            user_type=validated_data['user_type'],
-            phone_number=validated_data.get('phone_number', ''),
-            address=validated_data.get('address', '')
-        )
+        user = User.objects.create_user(**validated_data)
         return user
 
 class VendorProfileSerializer(serializers.ModelSerializer):
