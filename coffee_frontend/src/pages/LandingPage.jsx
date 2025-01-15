@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import HeroImage from '../assets/coffee.jpg';
 import PropTypes from 'prop-types';
@@ -7,7 +8,7 @@ import PropTypes from 'prop-types';
 const ProductShape = PropTypes.shape({
   id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   name: PropTypes.string.isRequired,
-  price: PropTypes.number.isRequired,
+  price: PropTypes.string.isRequired,
   image_url: PropTypes.string.isRequired,
   roast_type: PropTypes.string.isRequired,
   origin: PropTypes.string.isRequired,
@@ -24,7 +25,7 @@ const ProductCarousel = ({ products }) => {
     // Show 3 products at a time on large screens, 1 on smaller screens
     const updateVisibleProducts = () => {
       const productsToShow = [];
-      const productsToShowCount = window.innerWidth >= 1024 ? 3 : 1; // Adjust based on screen size
+      const productsToShowCount = window.innerWidth >= 1024 ? 3 : 1;
 
       for (let i = 0; i < productsToShowCount; i++) {
         const index = (currentIndex + i) % products.length;
@@ -120,6 +121,15 @@ ProductCarousel.propTypes = {
 const LandingPage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  const handleOrder = () => {
+    navigate('/shop');
+  }
+
+  const handleAbout = () => {
+    navigate('/about');
+  }
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -156,10 +166,10 @@ const LandingPage = () => {
               Choose and taste delicious coffee from the best beans.
             </p>
             <div className="flex flex-wrap gap-4">
-              <button className="bg-amber-600 text-white px-8 py-3 rounded-lg hover:bg-amber-500 transition-colors">
+              <button className="bg-amber-600 text-white px-8 py-3 rounded-lg hover:bg-amber-500 transition-colors" onClick={handleOrder}>
                 Order Now
               </button>
-              <button className="border border-white text-white px-8 py-3 rounded-lg hover:bg-white hover:text-black transition-colors">
+              <button className="border border-white text-white px-8 py-3 rounded-lg hover:bg-white hover:text-black transition-colors" onClick={handleAbout}>
                 Learn About Us
               </button>
             </div>
