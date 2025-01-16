@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { Menu, X, LogOut, User } from "lucide-react"; // Importing Lucide icons
+import { Menu, X, LogOut, User } from "lucide-react";
 import PropTypes from "prop-types";
 
 // Logo Component
@@ -91,15 +91,26 @@ const NavBar = () => {
                 </button>
               </>
             ) : (
-              <NavLink to="/login">
-                <button
-                  className="bg-amber-600 text-white px-6 py-2 rounded-md 
-                             transition-all duration-300 hover:bg-amber-700 
-                             focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-opacity-50"
-                >
-                  Login
-                </button>
-              </NavLink>
+              <div className="flex space-x-4">
+                <NavLink to="/login">
+                  <button
+                    className="bg-amber-600 text-white px-6 py-2 rounded-md 
+                               transition-all duration-300 hover:bg-amber-700 
+                               focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-opacity-50"
+                  >
+                    Login
+                  </button>
+                </NavLink>
+                <NavLink to="/signup">
+                  <button
+                    className="bg-white text-amber-600 px-6 py-2 rounded-md 
+                               transition-all duration-300 hover:bg-gray-100 
+                               focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-opacity-50"
+                  >
+                    Sign Up
+                  </button>
+                </NavLink>
+              </div>
             )}
           </div>
 
@@ -119,7 +130,7 @@ const NavBar = () => {
             <NavItem to="/shop" setIsOpen={setIsOpen}>Shop</NavItem>
             <NavItem to="/contact" setIsOpen={setIsOpen}>Contact</NavItem>
             {isAuthenticated && <NavItem to="/profile" setIsOpen={setIsOpen}>Profile</NavItem>}
-            <div className="mt-4">
+            <div className="mt-4 space-y-2">
               {isAuthenticated ? (
                 <button
                   onClick={handleLogout}
@@ -129,14 +140,24 @@ const NavBar = () => {
                   Logout
                 </button>
               ) : (
-                <NavLink to="/login" onClick={() => setIsOpen(false)}>
-                  <button
-                    className="bg-amber-600 text-white px-4 py-2 rounded-md w-full 
-                               hover:bg-amber-700 transition duration-300"
-                  >
-                    Login
-                  </button>
-                </NavLink>
+                <>
+                  <NavLink to="/login" onClick={() => setIsOpen(false)}>
+                    <button
+                      className="bg-amber-600 text-white px-4 py-2 rounded-md w-full 
+                                 hover:bg-amber-700 transition duration-300"
+                    >
+                      Login
+                    </button>
+                  </NavLink>
+                  <NavLink to="/signup" onClick={() => setIsOpen(false)}>
+                    <button
+                      className="bg-white text-amber-600 px-4 py-2 rounded-md w-full 
+                                 hover:bg-gray-100 transition duration-300"
+                    >
+                      Sign Up
+                    </button>
+                  </NavLink>
+                </>
               )}
             </div>
           </div>
