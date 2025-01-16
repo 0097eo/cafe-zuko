@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import LoginImage from "../assets/coffee.jpg";
+import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
 
@@ -11,6 +12,12 @@ const LoginPage = () => {
     })
     const [errors, setErrors] = useState(null)
     const [loading, showLoading] = useState(false)
+    const navigate = useNavigate();
+
+
+    const handleLoginSuccess = () => {
+        navigate('/shop');
+    }
 
 
     const handleInputChange = (e) => {
@@ -43,6 +50,7 @@ const LoginPage = () => {
             const success = await login(formData.username, formData.password);
             if (success) {
                 setFormData({ username: '', password: '' });
+                handleLoginSuccess();
             } else {
                 setErrors('Login failed, check your credentials.');
             }
