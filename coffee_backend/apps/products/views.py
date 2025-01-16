@@ -9,12 +9,12 @@ class IsVendorOrReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
             return True
-        return hasattr(request.user, 'vendorprofile')
+        return hasattr(request.user, 'vendor_profile')
 
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
             return True
-        return obj.vendor == request.user.vendorprofile
+        return obj.vendor == request.user.vendor_profile
 
 class IsReviewOwnerOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
@@ -59,7 +59,7 @@ class ProductListCreateView(APIView):
 
         serializer = ProductSerializer(data=data, context={'request': request})
         if serializer.is_valid():
-            serializer.save(vendor=request.user.vendorprofile)
+            serializer.save(vendor=request.user.vendor_profile)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

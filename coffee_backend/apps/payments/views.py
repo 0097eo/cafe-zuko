@@ -3,10 +3,16 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.conf import settings
 from .models import Payment, Refund
+from ..orders.models import Order
+from ..products.models import Product
 from .serializers import PaymentSerializer, RefundSerializer
 import base64
 from datetime import datetime
 import requests
+
+from django.core.exceptions import ObjectDoesNotExist
+
+
 
 class InitiateMpesaPaymentView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -114,6 +120,54 @@ class MpesaCallbackView(APIView):
             return Response({
                 'error': 'Payment not found'
             }, status=status.HTTP_404_NOT_FOUND)
+        
+class PaymentListView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get(self, request):
+
+        if request.user.user_type == 'VENDOR':
+            try:
+                # Get the vendor profile
+                vendor_profile = request.user.vendor_profile
+                
+                # Get products
+                vendor_products = Product.objects.filter(vendor=vendor_profile)
+
+                
+                # Get orders
+                vendor_orders = Order.objects.filter(
+                    items__product__in=vendor_products
+                ).distinct()
+                
+                # Get payments
+                payments = Payment.objects.filter(order__in=vendor_orders)
+
+                
+                serializer = PaymentSerializer(payments, many=True)
+                return Response(serializer.data)
+                
+            except ObjectDoesNotExist as e:
+                return Response({
+                    'error': 'Vendor profile or related data not found',
+                    'detail': str(e)
+                }, status=status.HTTP_404_NOT_FOUND)
+            except Exception as e:
+                return Response({
+                    'error': 'An unexpected error occurred',
+                    'detail': str(e)
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            try:
+                payments = Payment.objects.filter(order__customer=request.user)
+                serializer = PaymentSerializer(payments, many=True)
+                return Response(serializer.data)
+            except Exception as e:
+
+                return Response({
+                    'error': 'Error retrieving customer payments',
+                    'detail': str(e)
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class PaymentDetailView(APIView):
     permission_classes = [permissions.IsAuthenticated]
