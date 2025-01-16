@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import SignupImage from '../assets/coffee.jpg';
+import { Eye, EyeOff } from 'lucide-react';
 
 const SignupPage = () => {
     const [userType, setUserType] = useState('CUSTOMER');
@@ -17,12 +18,22 @@ const SignupPage = () => {
     });
     const [errors, setErrors] = useState({});
     const navigate = useNavigate();
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
         if (errors[name]) {
             setErrors(prev => ({ ...prev, [name]: '' }));
+        }
+    };
+
+    const togglePasswordVisibility = (field) => {
+        if (field === 'password') {
+            setShowPassword(!showPassword);
+        } else {
+            setShowConfirmPassword(!showConfirmPassword);
         }
     };
 
@@ -146,29 +157,53 @@ const SignupPage = () => {
                             )}
                         </div>
     
-                        <div>
+                        <div className="relative">
                             <input
-                                type="password"
+                                type={showPassword ? "text" : "password"}
                                 name="password"
                                 placeholder="Password (min. 8 characters)"
-                                className={getInputClassName('password')}
+                                className={`${getInputClassName('password')} pr-10`}
                                 onChange={handleInputChange}
                                 required
                             />
+                            <button
+                                type="button"
+                                onClick={() => togglePasswordVisibility('password')}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                aria-label={showPassword ? "Hide password" : "Show password"}
+                            >
+                                {showPassword ? (
+                                    <EyeOff className="h-5 w-5" />
+                                ) : (
+                                    <Eye className="h-5 w-5" />
+                                )}
+                            </button>
                             {errors.password && (
                                 <p className="text-red-500 text-sm mt-1">{errors.password}</p>
                             )}
                         </div>
     
-                        <div>
+                        <div className="relative">
                             <input
-                                type="password"
+                                type={showConfirmPassword ? "text" : "password"}
                                 name="confirm_password"
                                 placeholder="Confirm Password"
-                                className={getInputClassName('confirm_password')}
+                                className={`${getInputClassName('confirm_password')} pr-10`}
                                 onChange={handleInputChange}
                                 required
                             />
+                            <button
+                                type="button"
+                                onClick={() => togglePasswordVisibility('confirm')}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                            >
+                                {showConfirmPassword ? (
+                                    <EyeOff className="h-5 w-5" />
+                                ) : (
+                                    <Eye className="h-5 w-5" />
+                                )}
+                            </button>
                             {errors.confirm_password && (
                                 <p className="text-red-500 text-sm mt-1">{errors.confirm_password}</p>
                             )}
@@ -238,6 +273,15 @@ const SignupPage = () => {
                         >
                             Sign Up
                         </button>
+                        <div className="mt-4 text-center text-sm text-white">
+                        Already have an account?{' '}
+                        <Link 
+                            to="/login" 
+                            className="font-medium text-amber-500 hover:text-amber-700"
+                        >
+                            Sign In
+                        </Link>
+                    </div>
                     </form>
                 </div>
             </div>

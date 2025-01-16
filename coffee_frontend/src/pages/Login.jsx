@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import LoginImage from "../assets/coffee.jpg";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
 
 const LoginPage = () => {
 
@@ -12,11 +13,16 @@ const LoginPage = () => {
     })
     const [errors, setErrors] = useState(null)
     const [loading, showLoading] = useState(false)
+    const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
 
 
     const handleLoginSuccess = () => {
         navigate('/shop');
+    }
+
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
     }
 
 
@@ -74,7 +80,7 @@ const LoginPage = () => {
             <div className="w-1/2 flex justify-center items-center">
                 <div className='max-w-md w-full px-6'>
                     <h2 className="text-white text-3xl font-extrabold text-center mb-6">
-                        Sign in to your account
+                        Welcome Back
                     </h2>
                     {errors && (
                         <div 
@@ -91,22 +97,34 @@ const LoginPage = () => {
                                 type="text" 
                                 name="username" 
                                 id="username" 
-                                placeholder="Enter you username"
+                                placeholder="Enter your username"
                                 value={formData.username}
                                 onChange={handleInputChange}
                                 className="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                             />
                         </div>
-                        <div>
+                        <div className="relative">
                             <input 
-                                type="password" 
+                                type={showPassword ? "text" : "password"}
                                 name="password" 
                                 id="password"
-                                placeholder="Enter you password"
+                                placeholder="Enter your password"
                                 value={formData.password}
                                 onChange={handleInputChange}
-                                className="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                                className="mt-1 block w-full px-3 py-2 pr-10 border border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                             />
+                            <button
+                                type="button"
+                                onClick={togglePasswordVisibility}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                aria-label={showPassword ? "Hide password" : "Show password"}
+                            >
+                                {showPassword ? (
+                                    <EyeOff className="h-5 w-5" />
+                                ) : (
+                                    <Eye className="h-5 w-5" />
+                                )}
+                            </button>
                         </div>
                         <div>
                             <button 
@@ -116,6 +134,15 @@ const LoginPage = () => {
                                 {loading ? 'Loading...' : 'Sign in'}
                             </button>
                         </div>
+                        <div className="mt-4 text-center text-sm text-white">
+                        Don't have an account?{' '}
+                        <Link 
+                            to="/signup" 
+                            className="font-medium text-amber-500 hover:text-amber-700"
+                        >
+                            Sign up
+                        </Link>
+                    </div>
                     </form>
                 </div>
             </div>
