@@ -70,7 +70,7 @@ const ProductsPage = () => {
               value={filters.roast}
               onChange={(e) => setFilters(prev => ({ ...prev, roast: e.target.value }))}
             >
-              <option value="*">All Roast Types</option>
+              <option value="*">Roast Types</option>
               <option value="LIGHT">Light</option>
               <option value="MEDIUM">Medium</option>
               <option value="DARK">Dark</option>
@@ -82,7 +82,7 @@ const ProductsPage = () => {
               value={filters.category}
               onChange={(e) => setFilters(prev => ({ ...prev, category: e.target.value }))}
             >
-              <option value="*">All Categories</option>
+              <option value="*">Categories</option>
               <option value="4">Single Origin</option>
               <option value="3">Blend</option>
               <option value="2">Espresso</option>
@@ -95,7 +95,7 @@ const ProductsPage = () => {
               value={filters.vendor}
               onChange={(e) => setFilters(prev => ({ ...prev, vendor: e.target.value }))}
             >
-              <option value="">All Vendors</option>
+              <option value="">Vendors</option>
               <option value="1">Vendor 1</option>
               <option value="2">Vendor 2</option>
               <option value="3">Vendor 3</option>
