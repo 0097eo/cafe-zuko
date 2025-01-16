@@ -3,7 +3,9 @@ import {
   User, 
   Package, 
   CreditCard,
-  LogOut
+  LogOut,
+  X,
+  Menu
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -20,6 +22,7 @@ const UserDashboard = () => {
     orders: true,
     payments: true
   });
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Fetch user profile only if user is a vendor
   useEffect(() => {
@@ -85,17 +88,15 @@ const UserDashboard = () => {
           const paymentsData = await response.json();
           setPayments(paymentsData);
         } else {
-          // For customers, fetch payments for their orders
-          const paymentPromises = orders.map(order => 
-            fetch(`/api/payments/${order.payment_id}/`, {
-              headers: {
-                'Authorization': `Bearer ${user.access}`
-              }
-            }).then(res => res.json())
-          );
-          
-          const paymentsData = await Promise.all(paymentPromises);
-          setPayments(paymentsData.filter(payment => payment !== null));
+          // For customers, we should just fetch all their payments in one request
+          // since the backend already filters by customer
+          const response = await fetch('/api/payments/payments/', {
+            headers: {
+              'Authorization': `Bearer ${user.access}`
+            }
+          });
+          const paymentsData = await response.json();
+          setPayments(paymentsData);
         }
       } catch (error) {
         console.error('Error fetching payments:', error);
@@ -103,12 +104,12 @@ const UserDashboard = () => {
         setLoading(prev => ({ ...prev, payments: false }));
       }
     };
-
-    // For vendors, fetch immediately. For customers, wait for orders
-    if (user.user_type === 'VENDOR' || orders.length > 0) {
+  
+    // Fetch payments when component mounts or user changes
+    if (user?.access) {
       fetchPayments();
     }
-  }, [orders, user.access, user.user_type]);
+  }, [user.access, user.user_type]);
 
   const handleUpdateProfile = async () => {
     try {
@@ -142,7 +143,7 @@ const UserDashboard = () => {
 
   const handleCancelOrder = async (orderId) => {
     try {
-      await fetch(`/api/orders/${orderId}/`, {
+      await fetch(`/api/orders/orders/${orderId}/`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('access_token')}`
@@ -180,24 +181,24 @@ const UserDashboard = () => {
   };
 
   const renderProfile = () => (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-2xl font-bold mb-6">Profile Information</h2>
+    <div className="bg-gray-900 rounded-lg shadow-md p-4 md:p-6">
+      <h2 className="text-white text-xl md:text-2xl font-bold mb-4 md:mb-6">Profile Information</h2>
       {loading.profile ? (
-        <p className="text-gray-600">Loading profile...</p>
+        <p className="text-gray-400">Loading profile...</p>
       ) : !isEditing ? (
         <div className="space-y-4">
-          <p className="text-gray-700"><span className="font-semibold">Username:</span> {userProfile?.username}</p>
-          <p className="text-gray-700"><span className="font-semibold">Email:</span> {userProfile?.email}</p>
+          <p className="text-sm md:text-base text-gray-400"><span className="font-semibold text-white">Username:</span> {userProfile?.username}</p>
+          <p className="text-sm md:text-base text-gray-400"><span className="font-semibold text-white">Email:</span> {userProfile?.email}</p>
           {user.user_type === 'VENDOR' && (
             <>
-              <p className="text-gray-700"><span className="font-semibold">Business Name:</span> {userProfile?.vendor_profile?.business_name}</p>
-              <p className="text-gray-700"><span className="font-semibold">Business Description:</span> {userProfile?.vendor_profile?.business_description}</p>
-              <p className="text-gray-700"><span className="font-semibold">Business Address:</span> {userProfile?.vendor_profile?.business_address}</p>
+              <p className="text-sm md:text-base text-gray-400"><span className="font-semibold text-white">Business Name:</span> {userProfile?.vendor_profile?.business_name}</p>
+              <p className="text-sm md:text-base text-gray-400"><span className="font-semibold text-white">Business Description:</span> {userProfile?.vendor_profile?.business_description}</p>
+              <p className="text-sm md:text-base text-gray-400"><span className="font-semibold text-white">Business Address:</span> {userProfile?.vendor_profile?.business_address}</p>
             </>
           )}
           <button 
             onClick={() => setIsEditing(true)}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
+            className="w-full md:w-auto bg-amber-600 text-white px-4 py-2 rounded hover:bg-amber-500 transition-colors"
           >
             Edit Profile
           </button>
@@ -205,7 +206,7 @@ const UserDashboard = () => {
       ) : (
         <div className="space-y-4">
           <input
-            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 text-sm md:text-base bg-gray-800 border border-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-amber-600"
             placeholder="Email"
             value={editForm.email}
             onChange={(e) => setEditForm({...editForm, email: e.target.value})}
@@ -213,7 +214,7 @@ const UserDashboard = () => {
           {user.user_type === 'VENDOR' && (
             <>
               <input
-                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 text-sm md:text-base bg-gray-800 border border-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-amber-600"
                 placeholder="Business Name"
                 value={editForm.vendor_profile?.business_name}
                 onChange={(e) => setEditForm({
@@ -225,7 +226,7 @@ const UserDashboard = () => {
                 })}
               />
               <input
-                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 text-sm md:text-base bg-gray-800 border border-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-amber-600"
                 placeholder="Business Description"
                 value={editForm.vendor_profile?.business_description}
                 onChange={(e) => setEditForm({
@@ -237,7 +238,7 @@ const UserDashboard = () => {
                 })}
               />
               <input
-                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 text-sm md:text-base bg-gray-800 border border-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-amber-600"
                 placeholder="Business Address"
                 value={editForm.vendor_profile?.business_address}
                 onChange={(e) => setEditForm({
@@ -250,10 +251,10 @@ const UserDashboard = () => {
               />
             </>
           )}
-          <div className="space-x-2">
+          <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2">
             <button 
               onClick={handleUpdateProfile}
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
+              className="w-full md:w-auto bg-amber-600 text-white px-4 py-2 rounded hover:bg-amber-500 transition-colors"
             >
               Save
             </button>
@@ -262,7 +263,7 @@ const UserDashboard = () => {
                 setIsEditing(false);
                 setEditForm(userProfile);
               }}
-              className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition-colors"
+              className="w-full md:w-auto bg-gray-700 text-gray-300 px-4 py-2 rounded hover:bg-gray-600 transition-colors"
             >
               Cancel
             </button>
@@ -273,29 +274,29 @@ const UserDashboard = () => {
   );
 
   const renderOrders = () => (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-2xl font-bold mb-6">
+    <div className="bg-gray-900 rounded-lg shadow-md p-4 md:p-6">
+      <h2 className="text-white text-xl md:text-2xl font-bold mb-4 md:mb-6">
         {userProfile?.user_type === 'VENDOR' ? 'All Orders' : 'My Orders'}
       </h2>
       {loading.orders ? (
-        <p className="text-gray-600">Loading orders...</p>
+        <p className="text-gray-400">Loading orders...</p>
       ) : orders.length === 0 ? (
-        <p className="text-gray-600">No orders found.</p>
+        <p className="text-gray-400">No orders found.</p>
       ) : (
         <div className="space-y-4">
           {orders.map(order => (
-            <div key={order.id} className="border rounded-lg p-4">
-              <div className="flex justify-between items-center">
+            <div key={order.id} className="border border-gray-700 rounded-lg p-4 bg-gray-800">
+              <div className="flex flex-col md:flex-row md:justify-between md:items-center space-y-4 md:space-y-0">
                 <div className="space-y-2">
-                  <p className="text-gray-700"><span className="font-semibold">Order ID:</span> {order.id}</p>
-                  <p className="text-gray-700"><span className="font-semibold">Status:</span> {order.status}</p>
-                  <p className="text-gray-700"><span className="font-semibold">Total Amount:</span> ${order.total_amount}</p>
-                  <p className="text-gray-700"><span className="font-semibold">Created At:</span> {new Date(order.created_at).toLocaleDateString()}</p>
+                  <p className="text-sm md:text-base text-gray-400"><span className="font-semibold text-white">Order ID:</span> {order.id}</p>
+                  <p className="text-sm md:text-base text-gray-400"><span className="font-semibold text-white">Status:</span> {order.status}</p>
+                  <p className="text-sm md:text-base text-gray-400"><span className="font-semibold text-white">Total Amount:</span> Ksh {order.total_amount}</p>
+                  <p className="text-sm md:text-base text-gray-400"><span className="font-semibold text-white">Created At:</span> {new Date(order.created_at).toLocaleDateString()}</p>
                 </div>
                 {order.status === 'PENDING' && (
                   <button 
                     onClick={() => handleCancelOrder(order.id)}
-                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
+                    className="w-full md:w-auto bg-red-600 text-white px-4 py-2 rounded hover:bg-red-500 transition-colors"
                   >
                     Cancel Order
                   </button>
@@ -309,33 +310,33 @@ const UserDashboard = () => {
   );
 
   const renderPayments = () => (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-2xl font-bold mb-6">
+    <div className="bg-gray-900 rounded-lg shadow-md p-4 md:p-6">
+      <h2 className="text-white text-xl md:text-2xl font-bold mb-4 md:mb-6">
         {userProfile?.user_type === 'VENDOR' ? 'All Payments' : 'My Payments'}
       </h2>
       {loading.payments ? (
-        <p className="text-gray-600">Loading payments...</p>
+        <p className="text-gray-400">Loading payments...</p>
       ) : payments.length === 0 ? (
-        <p className="text-gray-600">No payments found.</p>
+        <p className="text-gray-400">No payments found.</p>
       ) : (
         <div className="space-y-4">
           {payments.map(payment => (
-            <div key={payment.id} className="border rounded-lg p-4">
-              <div className="flex justify-between items-center">
+            <div key={payment.id} className="border border-gray-700 rounded-lg p-4 bg-gray-800">
+              <div className="flex flex-col md:flex-row md:justify-between md:items-center space-y-4 md:space-y-0">
                 <div className="space-y-2">
-                  <p className="text-gray-700"><span className="font-semibold">Payment ID:</span> {payment.id}</p>
-                  <p className="text-gray-700"><span className="font-semibold">Amount:</span> ${payment.amount}</p>
-                  <p className="text-gray-700"><span className="font-semibold">Status:</span> {payment.status}</p>
-                  <p className="text-gray-700"><span className="font-semibold">Method:</span> {payment.payment_method}</p>
-                  <p className="text-gray-700"><span className="font-semibold">Order ID:</span> {payment.order_id}</p>
+                  <p className="text-sm md:text-base text-gray-400"><span className="font-semibold text-white">Payment ID:</span> {payment.id}</p>
+                  <p className="text-sm md:text-base text-gray-400"><span className="font-semibold text-white">Amount:</span> ${payment.amount}</p>
+                  <p className="text-sm md:text-base text-gray-400"><span className="font-semibold text-white">Status:</span> {payment.status}</p>
+                  <p className="text-sm md:text-base text-gray-400"><span className="font-semibold text-white">Method:</span> {payment.payment_method}</p>
+                  <p className="text-sm md:text-base text-gray-400"><span className="font-semibold text-white">Order ID:</span> {payment.order_id}</p>
                   {payment.transaction_id && (
-                    <p className="text-gray-700"><span className="font-semibold">Transaction ID:</span> {payment.transaction_id}</p>
+                    <p className="text-sm md:text-base text-gray-400"><span className="font-semibold text-white">Transaction ID:</span> {payment.transaction_id}</p>
                   )}
                 </div>
                 {payment.status === 'COMPLETED' && userProfile?.user_type === 'VENDOR' && (
                   <button 
                     onClick={() => handleInitiateRefund(payment.id)}
-                    className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition-colors"
+                    className="w-full md:w-auto bg-gray-700 text-gray-300 px-4 py-2 rounded hover:bg-gray-600 transition-colors"
                   >
                     Initiate Refund
                   </button>
@@ -349,41 +350,61 @@ const UserDashboard = () => {
   );
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex flex-col md:flex-row min-h-screen bg-black">
+      {/* Mobile Menu Button */}
+      <button
+        className="md:hidden fixed top-4 right-4 z-50 p-2 bg-gray-900 text-white rounded-lg shadow-md"
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+      >
+        {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+      </button>
+
       {/* Sidebar */}
-      <div className="w-64 bg-white shadow-lg">
-        <div className="p-6">
-          <h2 className="text-2xl font-bold mb-6">Dashboard</h2>
+      <div className={`
+        fixed md:static w-full md:w-64 bg-gray-900 shadow-lg z-40 transition-transform duration-300
+        ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+      `}>
+        <div className="p-4 md:p-6">
+          <h2 className="text-white text-xl md:text-2xl font-bold mb-4 md:mb-6">Dashboard</h2>
           <nav className="space-y-2">
             <button
               className={`w-full flex items-center space-x-3 p-3 rounded transition-colors ${
-                activeTab === 'profile' ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100'
+                activeTab === 'profile' ? 'bg-amber-600 text-white' : 'text-gray-400 hover:bg-gray-800'
               }`}
-              onClick={() => setActiveTab('profile')}
+              onClick={() => {
+                setActiveTab('profile');
+                setIsMobileMenuOpen(false);
+              }}
             >
               <User size={20} />
               <span>Profile</span>
             </button>
             <button
               className={`w-full flex items-center space-x-3 p-3 rounded transition-colors ${
-                activeTab === 'orders' ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100'
+                activeTab === 'orders' ? 'bg-amber-600 text-white' : 'text-gray-400 hover:bg-gray-800'
               }`}
-              onClick={() => setActiveTab('orders')}
+              onClick={() => {
+                setActiveTab('orders');
+                setIsMobileMenuOpen(false);
+              }}
             >
               <Package size={20} />
               <span>Orders</span>
             </button>
             <button
               className={`w-full flex items-center space-x-3 p-3 rounded transition-colors ${
-                activeTab === 'payments' ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100'
+                activeTab === 'payments' ? 'bg-amber-600 text-white' : 'text-gray-400 hover:bg-gray-800'
               }`}
-              onClick={() => setActiveTab('payments')}
+              onClick={() => {
+                setActiveTab('payments');
+                setIsMobileMenuOpen(false);
+              }}
             >
               <CreditCard size={20} />
               <span>Payments</span>
             </button>
             <button
-              className="w-full flex items-center space-x-3 p-3 rounded hover:bg-gray-100 transition-colors"
+              className="w-full flex items-center space-x-3 p-3 rounded text-gray-400 hover:bg-gray-800 transition-colors"
               onClick={logout}
             >
               <LogOut size={20} />
@@ -394,7 +415,7 @@ const UserDashboard = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-8 overflow-y-auto">
+      <div className="flex-1 p-4 md:p-8 mt-16 md:mt-0 overflow-y-auto">
         {activeTab === 'profile' && renderProfile()}
         {activeTab === 'orders' && renderOrders()}
         {activeTab === 'payments' && renderPayments()}
