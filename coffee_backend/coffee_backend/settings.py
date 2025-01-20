@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'apps.products.apps.ProductsConfig',
     'apps.orders.apps.OrdersConfig',
     'apps.payments.apps.PaymentsConfig',
+    'apps.cart.apps.CartConfig',
     'django_filters',
     'rest_framework',
     'rest_framework_simplejwt',
