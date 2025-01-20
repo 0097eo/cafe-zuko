@@ -72,14 +72,16 @@ const NavBar = () => {
 
           {/* User Actions (hidden in mobile) */}
           <div className="hidden md:flex items-center space-x-4">
-            <NavLink to="/cart" className="text-white hover:text-amber-500 transition-colors">
-              <ShoppingCart className="w-5 h-5" />
-            </NavLink>
+            
             {isAuthenticated ? (
               <>
                 <div className="flex items-center space-x-2 text-white">
+                  <NavLink to="/cart" className="text-white hover:text-amber-500 transition-colors">
+                    <ShoppingCart className="w-5 h-5" />
+                    
+                  </NavLink>
                   <span className="text-sm font-medium capitalize">
-                    {user.username}
+                    Hello, {user.username}
                   </span>
                 </div>
                 <button
