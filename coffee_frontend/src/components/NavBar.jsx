@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { Menu, X, LogOut, User } from "lucide-react";
+import { Menu, X, LogOut, ShoppingCart } from "lucide-react";
 import PropTypes from "prop-types";
 
 // Logo Component
@@ -72,10 +72,12 @@ const NavBar = () => {
 
           {/* User Actions (hidden in mobile) */}
           <div className="hidden md:flex items-center space-x-4">
+            <NavLink to="/cart" className="text-white hover:text-amber-500 transition-colors">
+              <ShoppingCart className="w-5 h-5" />
+            </NavLink>
             {isAuthenticated ? (
               <>
                 <div className="flex items-center space-x-2 text-white">
-                  <User className="w-5 h-5 text-gray-400" />
                   <span className="text-sm font-medium capitalize">
                     {user.username}
                   </span>
@@ -129,6 +131,12 @@ const NavBar = () => {
             <NavItem to="/about" setIsOpen={setIsOpen}>About</NavItem>
             <NavItem to="/shop" setIsOpen={setIsOpen}>Shop</NavItem>
             <NavItem to="/contact" setIsOpen={setIsOpen}>Contact</NavItem>
+            <NavItem to="/cart" setIsOpen={setIsOpen}>
+              <div className="flex items-center space-x-2">
+                <ShoppingCart className="w-5 h-5" />
+                <span>Cart</span>
+              </div>
+            </NavItem>
             {isAuthenticated && <NavItem to="/profile" setIsOpen={setIsOpen}>Profile</NavItem>}
             <div className="mt-4 space-y-2">
               {isAuthenticated ? (
