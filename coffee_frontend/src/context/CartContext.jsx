@@ -9,29 +9,50 @@ export const CartProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const { user, isAuthenticated } = useAuth();
 
-    // Load initial cart data
     useEffect(() => {
         const loadCart = async () => {
             if (isAuthenticated) {
-                // Load cart from backend for authenticated users
                 try {
-                    const response = await fetch('/api/cart/', {
+                    const response = await fetch('/api/cart/cart/', {
                         headers: {
                             'Authorization': `Bearer ${user.access}`
                         }
                     });
                     if (response.ok) {
                         const data = await response.json();
-                        setItems(data.items);
+                        if (Array.isArray(data) && data.length > 0) {
+                            const cartItems = data[0].items.map(item => ({
+                                cartItemId: item.id, 
+                                id: item.product.id,  
+                                name: item.product.name,
+                                price: parseFloat(item.product.price),
+                                image: item.product.image_url,
+                                quantity: item.quantity,
+                                description: item.product.description,
+                                roast_type: item.product.roast_type,
+                                origin: item.product.origin,
+                            }));
+                            setItems(cartItems);
+                        } else {
+                            setItems([]);
+                        }
                     }
                 } catch (error) {
                     console.error('Error loading cart:', error);
+                    setItems([]);
                 }
             } else {
-                // Load cart from localStorage for guests
                 const savedCart = localStorage.getItem('guestCart');
                 if (savedCart) {
-                    setItems(JSON.parse(savedCart));
+                    try {
+                        const parsedCart = JSON.parse(savedCart);
+                        setItems(Array.isArray(parsedCart) ? parsedCart : []);
+                    } catch (error) {
+                        console.error('Error parsing cart from localStorage:', error);
+                        setItems([]);
+                    }
+                } else {
+                    setItems([]);
                 }
             }
             setLoading(false);
@@ -42,16 +63,64 @@ export const CartProvider = ({ children }) => {
 
     // Save cart changes
     const saveCart = async (newItems) => {
+        if (!Array.isArray(newItems)) {
+            console.error('Invalid cart items format');
+            return false;
+        }
+
         if (isAuthenticated) {
             try {
-                await fetch('/api/cart/', {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${user.access}`
-                    },
-                    body: JSON.stringify({ items: newItems })
-                });
+                const newItemsSet = new Set(newItems.map(item => item.id));
+                const updatePromises = newItems
+                    .filter(item => item.cartItemId)
+                    .map(async (item) => {
+                        return fetch(`/api/cart/items/${item.cartItemId}/`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${user.access}`
+                            },
+                            body: JSON.stringify({
+                                product: item.id,
+                                quantity: item.quantity
+                            })
+                        });
+                    });
+
+                const addPromises = newItems
+                    .filter(item => !item.cartItemId)
+                    .map(async (item) => {
+                        const response = await fetch('/api/cart/cart/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${user.access}`
+                            },
+                            body: JSON.stringify({
+                                product: item.id,
+                                quantity: item.quantity
+                            })
+                        });
+                        
+                        if (response.ok) {
+                            const newCartItem = await response.json();
+                            item.cartItemId = newCartItem.id;
+                        }
+                        return response;
+                    });
+
+                const deletePromises = items
+                    .filter(item => !newItemsSet.has(item.id) && item.cartItemId)
+                    .map(item => 
+                        fetch(`/api/cart/items/${item.cartItemId}/`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Authorization': `Bearer ${user.access}`
+                            }
+                        })
+                    );
+
+                await Promise.all([...updatePromises, ...addPromises, ...deletePromises]);
             } catch (error) {
                 console.error('Error saving cart:', error);
                 return false;
@@ -63,7 +132,6 @@ export const CartProvider = ({ children }) => {
         return true;
     };
 
-    // Cart operations
     const addItem = async (item) => {
         const existingItem = items.find(i => i.id === item.id);
         let newItems;
@@ -104,24 +172,27 @@ export const CartProvider = ({ children }) => {
         return await saveCart([]);
     };
 
-    // Calculate total
-    const total = items.reduce((sum, item) => 
+    const total = Array.isArray(items) ? items.reduce((sum, item) => 
         sum + (item.price * item.quantity), 0
-    );
+    ) : 0;
 
-    // Transfer guest cart to user account after login
     const transferGuestCart = async () => {
         if (isAuthenticated) {
             const guestCart = localStorage.getItem('guestCart');
             if (guestCart) {
-                const guestItems = JSON.parse(guestCart);
-                await saveCart(guestItems);
-                localStorage.removeItem('guestCart');
+                try {
+                    const guestItems = JSON.parse(guestCart);
+                    if (Array.isArray(guestItems)) {
+                        await saveCart(guestItems);
+                        localStorage.removeItem('guestCart');
+                    }
+                } catch (error) {
+                    console.error('Error transferring guest cart:', error);
+                }
             }
         }
     };
 
-    // Listen for authentication changes
     useEffect(() => {
         if (isAuthenticated) {
             transferGuestCart();
@@ -129,7 +200,7 @@ export const CartProvider = ({ children }) => {
     }, [isAuthenticated]);
 
     const value = {
-        items,
+        items: items || [],
         total,
         loading,
         addItem,
