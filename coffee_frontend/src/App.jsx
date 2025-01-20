@@ -8,6 +8,7 @@ import ProductsPage from "./pages/Products"
 import AboutPage from "./pages/About"
 import ContactPage from "./pages/Contacts"
 import UserDashboard from "./pages/Dashboard"
+import Cart from "./components/Cart"
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/profile" element={<UserDashboard />} />
+        <Route path="/cart" element={<Cart />} />
       </Routes>
       <Footer />
     </Router>
