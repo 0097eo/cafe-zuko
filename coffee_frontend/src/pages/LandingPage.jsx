@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useCart } from "../context/CartContext";
 import HeroImage from '../assets/coffee.jpg';
 import PropTypes from 'prop-types';
-
 
 const ProductShape = PropTypes.shape({
   id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
@@ -20,9 +20,10 @@ const ProductShape = PropTypes.shape({
 const ProductCarousel = ({ products }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [visibleProducts, setVisibleProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const { addItem } = useCart();
 
   useEffect(() => {
-    // Show 3 products at a time on large screens, 1 on smaller screens
     const updateVisibleProducts = () => {
       const productsToShow = [];
       const productsToShowCount = window.innerWidth >= 1024 ? 3 : 1;
@@ -36,7 +37,6 @@ const ProductCarousel = ({ products }) => {
 
     updateVisibleProducts();
 
-    // Resize listener to update visible products on screen size change
     const handleResize = () => updateVisibleProducts();
     window.addEventListener('resize', handleResize);
 
@@ -53,6 +53,25 @@ const ProductCarousel = ({ products }) => {
     setCurrentIndex((prevIndex) => 
       prevIndex === 0 ? products.length - 1 : prevIndex - 1
     );
+  };
+
+  const handleAddToCart = async (product) => {
+    setLoading(true);
+    try {
+      await addItem({
+        id: product.id,
+        name: product.name,
+        price: parseFloat(product.price),
+        image: product.image_url,
+        description: product.description,
+        roast_type: product.roast_type,
+        origin: product.origin
+      });
+    } catch (error) {
+      console.error('Error adding item to cart:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -89,8 +108,12 @@ const ProductCarousel = ({ products }) => {
                   <span className="text-amber-600 text-xl font-bold">Ksh {product.price}</span>
                   <div className="flex gap-2">
                     {product.stock > 0 ? (
-                      <button className="bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-500 transition-colors">
-                        Add to Cart
+                      <button 
+                        className={`bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
+                        onClick={() => handleAddToCart(product)}
+                        disabled={loading}
+                      >
+                        {loading ? 'Adding...' : 'Add to Cart'}
                       </button>
                     ) : (
                       <span className="text-red-500 text-sm">Out of Stock</span>
@@ -125,11 +148,11 @@ const LandingPage = () => {
 
   const handleOrder = () => {
     navigate('/shop');
-  }
+  };
 
   const handleAbout = () => {
     navigate('/about');
-  }
+  };
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -155,7 +178,6 @@ const LandingPage = () => {
       <main className="container mx-auto px-4 py-12">
         {/* Hero Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-24">
-          {/* Text Content */}
           <div className="max-w-xl">
             <h1 className="text-white text-5xl lg:text-6xl font-bold mb-4 leading-tight">
               Experience 
@@ -175,7 +197,6 @@ const LandingPage = () => {
             </div>
           </div>
 
-          {/* Image Section */}
           <div className="relative w-full h-full min-h-[400px] lg:min-h-[500px]">
             <div className="absolute -inset-4 bg-amber-600/20 rounded-full blur-xl"></div>
             <div className="relative h-full w-full">
@@ -189,7 +210,6 @@ const LandingPage = () => {
           </div>
         </div>
 
-        {/* Popular Products Section */}
         {loading ? (
           <div className="text-white text-center">Loading products...</div>
         ) : (
