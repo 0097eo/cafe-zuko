@@ -18,16 +18,16 @@ const Footer = () => {
 
                 {/* Social Media Links */}
                 <div className="flex space-x-6 mb-8 md:mb-0">
-                    <a href="https://twitter.com" target="_blank" rel="noopener noreferrer">
+                    <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Visit our Twitter page">
                         <Twitter className="w-6 h-6 text-white hover:text-gray-400 transition-colors" />
                     </a>
-                    <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">
+                    <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Visit our Facebook page">
                         <Facebook className="w-6 h-6 text-white hover:text-gray-400 transition-colors" />
                     </a>
-                    <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">
+                    <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Visit our Instagram page">
                         <Instagram className="w-6 h-6 text-white hover:text-gray-400 transition-colors" />
                     </a>
-                    <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer">
+                    <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="Visit our LinkedIn page">
                         <Linkedin className="w-6 h-6 text-white hover:text-gray-400 transition-colors" />
                     </a>
                 </div>
