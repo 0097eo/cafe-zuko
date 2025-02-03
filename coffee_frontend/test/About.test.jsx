@@ -55,7 +55,6 @@ describe('AboutPage', () => {
     render(<AboutPage />);
     const image = screen.getByAltText('Coffee roasting process');
     expect(image).toBeInTheDocument();
-    expect(image).toHaveAttribute('alt', 'Coffee roasting process');
   });
 
 });
