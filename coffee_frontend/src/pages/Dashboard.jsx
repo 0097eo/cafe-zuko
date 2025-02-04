@@ -291,7 +291,7 @@ const UserDashboard = () => {
                   <p className="text-sm md:text-base text-gray-400"><span className="font-semibold text-white">Order ID:</span> {order.id}</p>
                   <p className="text-sm md:text-base text-gray-400"><span className="font-semibold text-white">Status:</span> {order.status}</p>
                   <p className="text-sm md:text-base text-gray-400"><span className="font-semibold text-white">Total Amount:</span> Ksh {order.total_amount}</p>
-                  <p className="text-sm md:text-base text-gray-400"><span className="font-semibold text-white">Created At:</span> {new Date(order.created_at).toLocaleDateString()}</p>
+                  <p className="text-sm md:text-base text-gray-400"><span className="font-semibold text-white">Made On:</span> {new Date(order.created_at).toLocaleDateString()}</p>
                 </div>
                 {order.status === 'PENDING' && (
                   <button 
