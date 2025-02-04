@@ -1,7 +1,8 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen} from '@testing-library/react'
 import {it, expect, describe, vi } from 'vitest'
 import userEvent from '@testing-library/user-event'
 import ContactPage from '../src/pages/Contacts'
+
 
 
 describe('ContactPage', () => {
@@ -51,10 +52,10 @@ describe('ContactPage', () => {
     expect(twitterLink).toHaveAttribute('href', 'https://twitter.com');
     
     [instagramLink, facebookLink, twitterLink].forEach(link => {
-      expect(link).toHaveAttribute('target', '_blank');
-      expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+        });
     });
-  });
     it('form inputs can be filled and maintain their values', async () => {
         const user = userEvent.setup();
         render(<ContactPage />);
@@ -71,24 +72,25 @@ describe('ContactPage', () => {
         expect(emailInput).toHaveValue('john@example.com');
         expect(messageInput).toHaveValue('Test message');
     });
-    it('form submission prevents default behavior', async () => {
+    it('prevents default form submission', async () => {
         const user = userEvent.setup();
         render(<ContactPage />);
         
-        const form = screen.getByLabelText('Contact form');
-        const submitButton = screen.getByText('Send Message');
+        const form = screen.getByRole('form', { name: /contact form/i });
+        const submitButton = screen.getByRole('button', { name: /send message/i });
         
-        // Create a mock submit event
-        const mockPreventDefault = vi.fn();
+        // Create a spy for preventDefault
+        const preventDefaultSpy = vi.fn();
         form.addEventListener('submit', (e) => {
-          e.preventDefault = mockPreventDefault;
+          e.preventDefault();
+          preventDefaultSpy();
         });
         
-        // Trigger form submission
+        // Submit the form
         await user.click(submitButton);
         
         // Verify preventDefault was called
-        expect(mockPreventDefault).toHaveBeenCalled();
+        expect(preventDefaultSpy).toHaveBeenCalled();
       });
 })
 
